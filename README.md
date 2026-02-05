@@ -1,154 +1,261 @@
-# __NVIDIA_OSS__ Standard Repo Template
+# GPU Assessment Tool
 
-This README file is from the NVIDIA_OSS standard repo template of [PLC-OSS-Template](https://github.com/NVIDIA-GitHub-Management/PLC-OSS-Template?tab=readme-ov-file). It provides a list of files in the PLC-OSS-Template and guidelines on how to use (clone and customize) them.
+A comprehensive Helm chart for monitoring GPU resources in Kubernetes clusters. This tool provides real-time visibility into GPU allocation, utilization, memory usage, and pod status through an integrated Prometheus and Grafana monitoring stack.
 
-**Upon completing the customization for the project repo, the repo admin should replace this README template with the project specific README file.**
-
-- Files (org-wide templates in the NVIDIA .github org repo; per-repo overrides allowed) in [PLC-OSS-Template](https://github.com/NVIDIA-GitHub-Management/PLC-OSS-Template?tab=readme-ov-file)
-
-   - Root 
-     - README.md skeleton (CTA + Quickstart + Support/Security/Governance links) 
-     - LICENSE (Apache 2.0 by default)
-        - For other licenses, see the [Confluence page](https://confluence.nvidia.com/pages/viewpage.action?pageId=788418816) for other licenses
-        - CLA.md file (delete if not using MIT or BSD licenses)
-     - CODE_OF_CONDUCT.md 
-     - SECURITY.md (vuln reporting path) 
-     - CONTRIBUTING.md (base; repo can add specifics)
-     - SUPPORT.md (Support levels/channels)
-     - GOVERNANCE.md (baseline; repo may extend)
-     - CITATION.md (for projects that need citation)
-
-   - .github/ 
-     - ISSUE_TEMPLATE/ (<https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository>)
-       - bug.yml, feature.yml, task.yml, config.yml 
-     - PULL_REQUEST_TEMPLATE.md (<https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository>)
-     - workflows/
-     - Note: workflow-templates/ for starter workflows should live in the org-level .github repo, not per-repo
-
-   - Repo-specific (not org-template, maintained by the team)
-     - CODEOWNERS (place at .github/CODEOWNERS or repo root)
-     - CHANGELOG.md (or RELEASE.md) 
-     - ROADMAP.md 
-     - MAINTAINERS.md 
-     - NOTICE or THIRD_PARTY_NOTICES / THIRD_PARTY_LICENSES (dependency specific)
-     - Build/package files (CMake, pyproject, Dockerfile, etc.)
-
-   - Recommended structure and hygiene
-     - docs/
-     - examples/
-     - tests/
-     - scripts/
-     - Container/dev env: Dockerfile, docker/, .devcontainer/ (optional)
-     - Build/package (language-specific):
-       - Python: pyproject.toml, setup.cfg/setup.py, requirements.txt, environment.yml
-       - C++: CMakeLists.txt, cmake/, vcpkg.json
-     - Repo hygiene: .gitignore, .gitattributes, .editorconfig, .pre-commit-config.yaml, .clang-format
-
-
-## Usage of [PLC-OSS-Template](https://github.com/NVIDIA-GitHub-Management/PLC-OSS-Template?tab=readme-ov-file) for NEW NVIDIA OSS repos
-
-1. Clone the [PLC-OSS-Template](https://github.com/NVIDIA-GitHub-Management/PLC-OSS-Template?tab=readme-ov-file)
-2. Find/replace all in the clone of `___PROJECT___` and `__PROJECT_NAME__` with the name of the specific project.
-3. Inspect all files to make sure all replacements work and update text as needed
-
-
-**What you can reuse immediately**
-- CODE_OF_CONDUCT.md
-- SECURITY.md
-- CONTRIBUTING.md (base)
-- .github/ISSUE_TEMPLATE/.yml (bug/feature/task + config.yml)
-- .github/PULL_REQUEST_TEMPLATE.md
-- Reusable workflows 
-
-**What you must customize per repo**
-- README.md: copy the skeleton and fill in product-specific details (Quickstart, Requirements, Usage, Support level, links)
-- LICENSE: check file is correct, update year, consult Confluence for alternatives https://confluence.nvidia.com/pages/viewpage.action?pageId=788418816, add CLA.md only if your license/process requires it
-- CODEOWNERS: replace <TEAM> with your GitHub team handle(s). Place at .github/CODEOWNERS (or repo root)
-- MAINTAINERS.md: list maintainers names/roles, escalation path
-- CHANGELOG.md (or RELEASE.md): track releases/changes
-- SUPPORT.md: Update for your project
-- ROADMAP.md (optional): upcoming milestones
-- NOTICE / THIRD_PARTY_NOTICES (if you ship third‑party content)
-- Build/package files (CMake/pyproject/Dockerfile/etc.), tests/, docs/, examples/, scripts/ as appropriate
-- Workflows: Edit if you need custom behavior 
-
-
-4. Change git origin to point to new repo and push
-5. Remove the line break below and everything above it
-
-## Usage for existing NVIDIA OSS repos
-
-1. Follow the steps above, but add the files to your existing repo and merge
-
-<!-- REMOVE THE LINE BELOW AND EVERYTHING ABOVE -->
------------------------------------------
-# [Project Title]
-One-sentence value proposition for users. Who is it for, and why it matters. 
+![GPU Assessment Dashboard](https://github.com/run-ai/gpu-assessment-tool/blob/master/dashboards/gpu-assessment-dashboard.png?raw=true)
 
 # Overview
-What the project does? Why the project is useful?
-Provide a brief overview, highlighting key features or problem-solving capabilities.
+
+The GPU Assessment Tool helps you:
+- **Monitor GPU allocation**: Track total vs. allocated GPUs across your cluster
+- **Measure GPU utilization**: View real-time GPU compute utilization percentages
+- **Track memory usage**: Monitor GPU memory consumption and availability
+- **Observe pod status**: See running and pending GPU-enabled pods
+- **Filter by GPU type**: Dynamic filtering by GPU model (e.g., A100, V100, etc.)
+
+The tool uses NVIDIA DCGM (Data Center GPU Manager) metrics collected by Prometheus and visualized through a pre-configured Grafana dashboard.
+
+## Architecture
+
+The tool consists of four main components:
+
+1. **DCGM Exporter**: Exposes NVIDIA GPU metrics (external - deployed via GPU Operator)
+2. **kube-state-metrics**: Exposes Kubernetes pod and resource metrics
+3. **Prometheus**: Collects and stores metrics from DCGM and kube-state-metrics
+4. **Grafana**: Provides visualization through the GPU Assessment Dashboard
+
+```
+┌─────────────────┐       ┌──────────────────┐
+│   DCGM Exporter │       │ kube-state-      │
+│                 │       │ metrics          │
+└────────┬────────┘       └────────┬─────────┘
+         │ GPU Metrics             │ K8s Metrics
+         │                         │
+         └────────┬────────────────┘
+                  │
+                  ▼
+         ┌─────────────────┐
+         │   Prometheus    │ Scrapes & Stores Metrics
+         └────────┬────────┘
+                  │ Queries
+                  ▼
+         ┌─────────────────┐
+         │    Grafana      │ Visualizes Dashboard
+         └─────────────────┘
+```
 
 # Getting Started
-Guide users on how they can get started with the project. This should include basic installation step, quick-start examples 
+
+## Step 1: Add Helm Chart Dependencies
+
+First, update the Helm dependencies to download Prometheus and Grafana charts:
+
 ```bash
-# Option A: Package manager (pip/conda/npm/etc.)
-<copy-paste install>
-
-# Option B: Container
-docker run <image> <args>
-
-# Verify (hello world)
-<one-liner or ~10-line example>
+helm dependency update
 ```
+
+This will download the required charts into the `charts/` directory.
+
+## Step 2: Install the Chart
+
+Install the chart with default configuration:
+
+```bash
+helm install gpu-assessment-tool . --namespace gpu-assessment-tool --create-namespace
+```
+
+Or install with custom values:
+
+```bash
+helm install gpu-assessment-tool . \
+  --namespace gpu-assessment-tool \
+  --create-namespace \
+  --values custom-values.yaml
+```
+
+## Step 3: Access Grafana Dashboard
+
+After installation, access the Grafana dashboard:
+
+```bash
+# Port-forward to Grafana service
+kubectl port-forward -n gpu-assessment-tool svc/gpu-assessment-tool-grafana 3000:80
+```
+
+Open your browser and navigate to: `http://localhost:3000`
+
+The GPU Assessment dashboard will automatically load as the home dashboard.
+
+To edit the dashboards, login with:
+- Username: `admin`
+- Password: `admin`
+
 # Requirements
-Include a list of pre-requisites. 
-- OS/Arch: <summary or link to full matrix>
-- Runtime/Compiler: <versions>
-- GPU/Drivers (if applicable): CUDA <ver>, driver <ver>, etc.
+
+| Component | Version | Required |
+|-----------|---------|----------|
+| Kubernetes | 1.19+ | Yes |
+| Helm | 3.0+ | Yes |
+| DCGM Exporter | --- | Yes |
+| Prometheus | 27.45.0 (included) | Yes |
+| Grafana | 10.1.4 (included) | Yes |
+
+### Verify DCGM Metrics
+
+Ensure DCGM metrics are available in your cluster:
+
+```bash
+# Check if DCGM exporter pods are running
+kubectl get pods -A | grep dcgm
+
+# Verify metrics are being exposed
+kubectl port-forward -n <dcgm-namespace> <dcgm-pod-name> 9400:9400
+curl http://localhost:9400/metrics | grep DCGM_FI_DEV
+```
 
 # Usage
-```bash
-# Minimal runnable snippet (≤20 lines)
-<code>
+
+## Basic Configuration
+
+The `values.yaml` file contains the default configuration. By default, the installation will spin up a Prometheus pod and a Grafana pod.
+
+If you do not have Prometheus installed on your cluster, you likely do not have kube-state-metrics exporter. Enable it:
+
+```yaml
+prometheus:
+  kube-state-metrics:
+    enabled: true
 ```
-- More examples/tutorials: <link>
-- API reference: <link>
 
-# Performance (Optional)
-Summary of benchmarks; link to detailed results and hardware used.
+> **Note**: Enabling kube-state-metrics when you already have one installed on your cluster might cause metrics duplication.
 
-## Releases & Roadmap 
-- Releases/Changelog: <link>
-- (Optional) Next milestones or link to `ROADMAP.md`.
-  
+## Using External Prometheus
+
+If you already have Prometheus running in your cluster, we recommend using it because it already holds historical data. To use it, disable the Prometheus installation and provide your Prometheus service endpoint:
+
+```yaml
+prometheus:
+  enabled: false  # Disable built-in Prometheus
+
+global:
+  prometheusUrl: "http://my-prometheus-server.monitoring.svc:9090"
+```
+
+## Customizing Resources
+
+If you experience slowness in the dashboard operation, try increasing the resources:
+
+```yaml
+prometheus:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 4096Mi
+    requests:
+      cpu: 200m
+      memory: 1024Mi
+
+grafana:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+```
+
+## Changing Grafana Credentials
+
+If you plan on exposing the dashboard, changing the credentials is recommended:
+
+```yaml
+grafana:
+  adminUser: your-admin-user
+  adminPassword: your-secure-password
+```
+
+## Dashboard Features
+
+The GPU Assessment Dashboard provides:
+
+| Feature | Description |
+|---------|-------------|
+| **GPU Allocation** | Time-series graph showing total GPUs vs. allocated GPUs, with percentage gauge |
+| **GPU Utilization** | Average GPU compute utilization with threshold indicators (green: >80%, yellow: 50-80%, red: <50%) |
+| **GPU Memory Usage** | Total memory capacity vs. used memory in mebibytes, with usage percentage |
+| **Running GPU Pods** | Count of running pods using GPUs |
+| **Pending GPU Pods** | Count of pods waiting for GPU resources to identify resource constraints |
+
+## Uninstallation
+
+To remove the GPU Assessment Tool:
+
+```bash
+helm uninstall gpu-assessment-tool --namespace gpu-assessment-tool
+```
+
+To also remove the namespace:
+
+```bash
+kubectl delete namespace gpu-assessment-tool
+```
+
+## Troubleshooting
+
+### No GPU metrics showing in Grafana
+
+1. Verify DCGM exporter is running:
+   ```bash
+   kubectl get pods -A | grep dcgm
+   ```
+
+2. Check Prometheus is scraping DCGM metrics:
+   ```bash
+   kubectl logs -n monitoring deployment/gpu-assessment-tool-prometheus-server
+   ```
+
+3. Ensure Prometheus has the correct ServiceMonitor or scrape configuration for DCGM
+
+### Grafana dashboard is empty
+
+1. Check Prometheus data source connection in Grafana
+2. Verify the Prometheus URL is correct
+3. Confirm DCGM metrics are available: `DCGM_FI_DEV_FB_FREE`, `DCGM_FI_DEV_GPU_UTIL`
+
+### Pods failing to start
+
+Check resource availability:
+
+```bash
+kubectl describe pod -n monitoring <pod-name>
+```
+
 # Contribution Guidelines
+
 - Start here: `CONTRIBUTING.md`
 - Code of Conduct: `CODE_OF_CONDUCT.md`
-- Development quickstart (build/test):
-```bash
-<clone> && <deps> && <build/test>
-```
+
 ## Governance & Maintainers
+
 - Governance: `GOVERNANCE.md`
-- Maintainers: <team/handles>
-- Labeling/triage policy: <link>
 
 ## Security
+
 - Vulnerability disclosure: `SECURITY.md`
 - Do not file public issues for security reports.
 
 ## Support
-- Level: <Experimental | Maintained | Stable>
-- How to get help: Issues/Discussions/<channel link>
-- Response expectations (if any).
 
-# Community
-Provide the channel for community communications.
+- How to get help: Issues/Discussions
 
 # References
-Provide a list of related references
+
+- [DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter)
+- [kube-state-metrics Documentation](https://github.com/kubernetes/kube-state-metrics)
+- [Prometheus Documentation](https://prometheus.io/docs/)
+- [Grafana Documentation](https://grafana.com/docs/)
 
 # License
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
-- License: <link>
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
