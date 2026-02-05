@@ -1,12 +1,12 @@
-# GPU Assessment Tool
+# GPU Usage Monitor
 
 A comprehensive Helm chart for monitoring GPU resources in Kubernetes clusters. This tool provides real-time visibility into GPU allocation, utilization, memory usage, and pod status through an integrated Prometheus and Grafana monitoring stack.
 
-![GPU Assessment Dashboard](https://github.com/run-ai/gpu-assessment-tool/blob/master/dashboards/gpu-assessment-dashboard.png?raw=true)
+![GPU Usage Monitor Dashboard](https://github.com/run-ai/gpu-usage-monitor/blob/master/dashboards/gpu-usage-monitor-dashboard.png?raw=true)
 
 # Overview
 
-The GPU Assessment Tool helps you:
+The GPU Usage Monitor helps you:
 - **Monitor GPU allocation**: Track total vs. allocated GPUs across your cluster
 - **Measure GPU utilization**: View real-time GPU compute utilization percentages
 - **Track memory usage**: Monitor GPU memory consumption and availability
@@ -22,7 +22,7 @@ The tool consists of four main components:
 1. **DCGM Exporter**: Exposes NVIDIA GPU metrics (external - deployed via GPU Operator)
 2. **kube-state-metrics**: Exposes Kubernetes pod and resource metrics
 3. **Prometheus**: Collects and stores metrics from DCGM and kube-state-metrics
-4. **Grafana**: Provides visualization through the GPU Assessment Dashboard
+4. **Grafana**: Provides visualization through the GPU Usage Monitor Dashboard
 
 ```
 ┌─────────────────┐       ┌──────────────────┐
@@ -61,14 +61,14 @@ This will download the required charts into the `charts/` directory.
 Install the chart with default configuration:
 
 ```bash
-helm install gpu-assessment-tool . --namespace gpu-assessment-tool --create-namespace
+helm install gpu-usage-monitor . --namespace gpu-usage-monitor --create-namespace
 ```
 
 Or install with custom values:
 
 ```bash
-helm install gpu-assessment-tool . \
-  --namespace gpu-assessment-tool \
+helm install gpu-usage-monitor . \
+  --namespace gpu-usage-monitor \
   --create-namespace \
   --values custom-values.yaml
 ```
@@ -79,12 +79,12 @@ After installation, access the Grafana dashboard:
 
 ```bash
 # Port-forward to Grafana service
-kubectl port-forward -n gpu-assessment-tool svc/gpu-assessment-tool-grafana 3000:80
+kubectl port-forward -n gpu-usage-monitor svc/gpu-usage-monitor-grafana 3000:80
 ```
 
 Open your browser and navigate to: `http://localhost:3000`
 
-The GPU Assessment dashboard will automatically load as the home dashboard.
+The GPU Usage Monitor dashboard will automatically load as the home dashboard.
 
 To edit the dashboards, login with:
 - Username: `admin`
@@ -177,7 +177,7 @@ grafana:
 
 ## Dashboard Features
 
-The GPU Assessment Dashboard provides:
+The GPU Usage Monitor Dashboard provides:
 
 | Feature | Description |
 |---------|-------------|
@@ -189,16 +189,16 @@ The GPU Assessment Dashboard provides:
 
 ## Uninstallation
 
-To remove the GPU Assessment Tool:
+To remove the GPU Usage Monitor:
 
 ```bash
-helm uninstall gpu-assessment-tool --namespace gpu-assessment-tool
+helm uninstall gpu-usage-monitor --namespace gpu-usage-monitor
 ```
 
 To also remove the namespace:
 
 ```bash
-kubectl delete namespace gpu-assessment-tool
+kubectl delete namespace gpu-usage-monitor
 ```
 
 ## Troubleshooting
@@ -212,7 +212,7 @@ kubectl delete namespace gpu-assessment-tool
 
 2. Check Prometheus is scraping DCGM metrics:
    ```bash
-   kubectl logs -n monitoring deployment/gpu-assessment-tool-prometheus-server
+   kubectl logs -n monitoring deployment/gpu-usage-monitor-prometheus-server
    ```
 
 3. Ensure Prometheus has the correct ServiceMonitor or scrape configuration for DCGM
