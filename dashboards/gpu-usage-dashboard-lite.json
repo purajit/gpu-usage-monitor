@@ -1300,7 +1300,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "GPU Assessment Lite",
-  "uid": "gpu-assessment-lite",
+  "title": "GPU Usage Lite",
+  "uid": "gpu-usage-lite",
   "version": 1
 }

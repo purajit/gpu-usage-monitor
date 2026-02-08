@@ -68,7 +68,7 @@ grafana:
 
   grafana.ini:
     dashboards:
-      default_home_dashboard_path: '{{ if .Values.global.prometheusUrl }}/var/lib/grafana/dashboards/default/gpu-assessment-dashboard.json{{ else }}/var/lib/grafana/dashboards/default/gpu-assessment-dashboard-lite.json{{ end }}'
+      default_home_dashboard_path: '{{ if .Values.global.prometheusUrl }}/var/lib/grafana/dashboards/default/gpu-usage-dashboard.json{{ else }}/var/lib/grafana/dashboards/default/gpu-usage-dashboard-lite.json{{ end }}'
     auth.anonymous:
       enabled: true
       org_name: Main Org.

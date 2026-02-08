@@ -2,7 +2,7 @@
 
 A comprehensive Helm chart for monitoring GPU resources in Kubernetes clusters. This tool provides real-time visibility into GPU allocation, utilization, memory usage, and pod status through an integrated Prometheus and Grafana monitoring stack.
 
-![GPU Usage Monitor Dashboard](https://github.com/run-ai/gpu-usage-monitor/blob/master/dashboards/gpu-usage-monitor-dashboard.png?raw=true)
+![GPU Usage Monitor Dashboard](https://github.com/run-ai/gpu-usage-monitor/blob/master/dashboards/gpu-usage-dashboard.png?raw=true)
 
 # Overview
 

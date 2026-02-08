@@ -1300,7 +1300,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "GPU Assessment",
-  "uid": "gpu-assessment",
+  "title": "GPU Usage",
+  "uid": "gpu-usage",
   "version": 1
 }

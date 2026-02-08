@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: gpu-assessment-tool
-description: A Helm chart for GPU assessment tool with monitoring stack
+name: gpu-usage-monitor
+description: A Helm chart for GPU usage monitor with monitoring stack
 type: application
 version: 0.1.0
 appVersion: 0.1.0

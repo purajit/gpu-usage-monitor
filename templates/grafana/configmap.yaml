@@ -9,7 +9,7 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  gpu-assessment-dashboard.json: |
-{{ .Files.Get "dashboards/gpu-assessment-dashboard.json" | indent 4 }}
-  gpu-assessment-dashboard-lite.json: |
-{{ .Files.Get "dashboards/gpu-assessment-dashboard-lite.json" | indent 4 }}
+  gpu-usage-dashboard.json: |
+{{ .Files.Get "dashboards/gpu-usage-dashboard.json" | indent 4 }}
+  gpu-usage-dashboard-lite.json: |
+{{ .Files.Get "dashboards/gpu-usage-dashboard-lite.json" | indent 4 }}
