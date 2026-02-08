@@ -1,3 +1,6 @@
+# Copyright 2025 NVIDIA CORPORATION
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v2
 name: gpu-assessment-tool
 description: A Helm chart for GPU assessment tool with monitoring stack
