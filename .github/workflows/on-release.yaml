@@ -6,6 +6,11 @@ on:
   release:
     types:
       - created
+
+permissions:
+  contents: read
+  packages: write
+
 env:
   HELM_REGISTRY: "ghcr.io/nvidia/gpu-usage-monitor"
 
@@ -38,10 +43,3 @@ jobs:
       - name: Push Helm Chart to GHCR
         run: |
           helm push ./charts/gpu-usage-monitor-$PACKAGE_VERSION.tgz oci://${{ env.HELM_REGISTRY }}
-
-      - name: Upload As Release Asset
-        uses: softprops/action-gh-release@v2
-        with:
-          files: charts/gpu-usage-monitor-${{ env.PACKAGE_VERSION }}.tgz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
